@@ -41,7 +41,7 @@ def deletePlayers():
 def countPlayers():
     """Returns the number of players currently registered."""
     conn, cur = connect()
-    cur.execute("SELECT COUNT(playerID) FROM players;")
+    cur.execute("SELECT COUNT(id) FROM players;")
     totalPlayers = cur.fetchone()[0]
     closeConnection(conn, cur)
 
@@ -58,7 +58,7 @@ def createTournament(game, date):
       date: the date when tournament begins (format: YYYY-MM-DD).
     """
     conn, cur = connect()
-    cur.execute("INSERT INTO tournaments (game, beginDate) VALUES (%s,%s) RETURNING tournamentID", (game,date,))
+    cur.execute("INSERT INTO tournaments (game, begin_date) VALUES (%s,%s) RETURNING id", (game,date,))
     conn.commit()
     id_of_new_row = cur.fetchone()[0]
     closeConnection(conn, cur)
@@ -110,7 +110,7 @@ def reportMatch(tournament, winner, loser):
       loser:  the id number of the player who lost
     """
     conn, cur = connect()
-    cur.execute("INSERT INTO matches (tournamentID, winnerID, loserID) VALUES (%s,%s,%s)", (tournament,winner, loser,))
+    cur.execute("INSERT INTO matches (tournament_id, winner_id, loser_id) VALUES (%s,%s,%s)", (tournament,winner, loser,))
     conn.commit()
     closeConnection(conn, cur)
  

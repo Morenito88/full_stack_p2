@@ -14,24 +14,24 @@
 
 -- Tournaments table (id, game, begin date)
 CREATE TABLE tournaments(
-	tournamentID serial primary key,
+	id serial primary key,
 	game varchar(200),
-	beginDate date
+	begin_date date
 );
 
 -- Players table (id, name, email)
 CREATE TABLE players(
-	playerID serial primary key,
+	id serial primary key,
 	name varchar(200),
 	email text
 );
 
 -- Matches table (id, tournament, winner, loser)
 CREATE TABLE matches(
-	matchID serial primary key,
-	tournamentID serial references tournaments(tournamentID),
-	winnerID serial references players(playerID),
-	loserID serial references players(playerID)
+	id serial primary key,
+	tournament_id serial references tournaments(id),
+	winner_id serial references players(id),
+	loser_id serial references players(id)
 );
 
 -- ************************************ --
@@ -43,49 +43,49 @@ CREATE TABLE matches(
 -- View to show the players standings (id, player, wins, matches)
 CREATE VIEW players_standings AS
 	SELECT
-		players.playerID AS id,
+		players.id AS id,
 		players.name AS name,
-		wins.totalWins AS wins,
-		SUM(wins.totalWins + defeats.totalLoses) AS matches
+		wins.total_wins AS wins,
+		SUM(wins.total_wins + defeats.total_loses) AS matches
 	FROM
 		players,
 		(
 			SELECT 
-				players.playerID,
-				COALESCE(COUNT(matches.loserID), 0) AS totalLoses
+				players.id,
+				COALESCE(COUNT(matches.loser_id), 0) AS total_loses
 			FROM
 				players
 			LEFT OUTER JOIN 
 				matches 
 			ON 
-				matches.loserID = players.playerID
+				matches.loser_id = players.id
 			GROUP BY
-				players.playerID
+				players.id
 		) AS defeats,
 		(
 			SELECT 
-				players.playerID,
-				COALESCE(COUNT(matches.winnerID), 0) AS totalWins
+				players.id,
+				COALESCE(COUNT(matches.winner_id), 0) AS total_wins
 			FROM
 				players
 			LEFT OUTER JOIN 
 				matches 
 			ON 
-				matches.winnerID = players.playerID
+				matches.winner_id = players.id
 			GROUP BY
-				players.playerID
+				players.id
 		) AS wins
 	WHERE
-		wins.playerID = players.playerID
+		wins.id = players.id
 	AND 
-		defeats.playerID = players.playerID
+		defeats.id = players.id
 	GROUP BY
-		players.playerID,
+		players.id,
 		players.name,
-		wins.totalWins,
-		defeats.totalLoses
+		wins.total_wins,
+		defeats.total_loses
 	ORDER BY
-		wins.totalWins DESC
+		wins.total_wins DESC
 	;
 
 -- ************************************ --
@@ -95,9 +95,9 @@ CREATE VIEW players_standings AS
 -- ************************************ --
 
 -- Add some data to tables for testing purposes
-INSERT INTO tournaments (game, beginDate) VALUES ('League of Legends', '2015-08-31');
+INSERT INTO tournaments (game, begin_date) VALUES ('League of Legends', '2015-08-31');
 INSERT INTO players (name, email) VALUES ('Vilhelm Reed', 'vreed@gmail.com'), ('Meint Émile', 'emilee@gmail.com'), ('Akoni Tiryaki', 'akoko@gmail.com'), ('Amalric Alexanderson', 'kidalexx@gmail.com');
-INSERT INTO matches (tournamentID, winnerID, loserID) VALUES (1,1,3),(1,1,4),(1,1,2),(1,2,4),(1,2,3),(1,3,4);
+INSERT INTO matches (tournament_id, winner_id, loser_id) VALUES (1,1,3),(1,1,4),(1,1,2),(1,2,4),(1,2,3),(1,3,4);
 
 -- View all data
 SELECT * FROM tournaments;
